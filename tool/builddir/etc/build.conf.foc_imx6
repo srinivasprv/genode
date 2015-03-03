@@ -1,1 +1,3 @@
 REPOSITORIES  = $(GENODE_DIR)/repos/base-foc
+
+RUN_OPT = --include boot_dir/foc

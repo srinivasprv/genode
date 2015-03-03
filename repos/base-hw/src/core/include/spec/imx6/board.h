@@ -17,9 +17,11 @@
 #define _BOARD_H_
 
 /* Genode includes */
-#include <platform/imx6/drivers/board_base.h>
+//#include <platform/imx6/drivers/board_base.h>
 #include <util/mmio.h>
 #include <unmanaged_singleton.h>
+/* core includes */
+#include <spec/cortex_a9/board_support.h>
 
 namespace Imx6
 {
@@ -77,7 +79,7 @@ namespace Imx6
 			}
 	};
 
-	struct Board : Genode::Board_base
+	struct Board : Cortex_a9/*Genode*/::Board_base
 	{
 		/**
 		 * static AIPS 1 instance
