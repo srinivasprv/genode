@@ -97,6 +97,9 @@ void Signal_session_component::free_context(Signal_context_capability context_ca
 
 	_signal_queue.remove_locked(context);
 	destroy(&_contexts_slab, context);
+
+	Nova::revoke(Nova::Obj_crd(context_cap.local_name(), 0));
+	cap_map()->remove(context_cap.local_name(), 0);
 }
 
 
