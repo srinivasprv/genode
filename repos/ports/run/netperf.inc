@@ -324,7 +324,12 @@ append_if [have_spec lan9118] qemu_args " -net nic,model=lan9118 "
 
 append qemu_args " -net user -redir tcp:12865::12865 -redir tcp:49153::49153 "
 
-run_genode_until $ip_match_string 60
+if {[have_spec linux]} {
+	run_genode_until {.*family AF_INET.*\n} 60
+} else {
+	run_genode_until $ip_match_string 60
+}
+
 set serial_id [output_spawn_id]
 
 set force_ports ""
