@@ -1,0 +1,96 @@
+assert_spec foc
+assert_spec platform_imx6
+
+#
+# Build
+#
+build {
+	core
+	init
+	drivers/timer
+	drivers/sd_card
+	drivers/uart
+	server/part_blk
+	l4linux
+}
+
+create_boot_directory
+
+#
+# Config
+#
+set config  {
+<config prio_levels="2">
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="RAM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="CAP"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+		<service name="SIGNAL"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<start name="timer" priority="0">
+		<resource name="RAM" quantum="1M"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+	<start name="kdb_uart_drv">
+		<resource name="RAM" quantum="1M"/>
+		<provides>
+			<service name="Terminal"/>
+			<service name="Uart"/>
+		</provides>
+		<config><policy label="vmlinux.1" uart="0"/></config>
+	</start>
+	<start name="sd_card_drv" priority="0">
+		<resource name="RAM" quantum="4M"/>
+		<provides><service name="Block"/></provides>
+	</start>
+	<start name="vmlinux.1">
+		<binary name="l4linux"/>
+		<resource name="RAM" quantum="296M"/>
+		<config args="mem=254M l4x_rd=initrd.gz">
+			<block label="sda" />
+		</config>
+		<route>
+			<service name="Block"> <child name="sd_card_drv"/> </service>
+			<any-service> <any-child/> <parent/> </any-service>
+		</route>
+	</start>
+</config>}
+
+install_config $config
+
+#
+# Boot modules
+#
+set boot_modules {
+	core
+	init
+	timer
+	part_blk
+	kdb_uart_drv
+	l4linux
+	initrd.gz
+	sd_card_drv
+}
+
+set uri "http://genode.org/files/release-11.11/l4lx/initrd-arm.gz"
+if {![file exists bin/initrd.gz]} {
+	puts "Download initramfs ..."
+	exec >& /dev/null wget -c -O bin/initrd.gz $uri
+}
+exec >& /dev/null wget -O bin/initrd.gz.md5 $uri.md5
+cd bin
+exec md5sum -c initrd.gz.md5
+cd ..
+
+build_boot_image  [join $boot_modules " "]
+

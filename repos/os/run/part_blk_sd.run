@@ -1,0 +1,81 @@
+#
+# \brief  Test of Block session interface provided by server/part_blk
+#
+
+#
+# Build
+#
+
+build {
+	core init
+	drivers/timer
+	drivers/sd_card
+	server/part_blk
+	test/blk/cli
+}
+
+create_boot_directory
+
+#
+# Generate config
+#
+
+install_config {
+<config prio_levels="1" verbose="yes">
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="RAM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="CAP"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+		<service name="SIGNAL" />
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<start name="timer">
+		<resource name="RAM" quantum="1M"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+	<start name="sd_card_drv">
+		<resource name="RAM" quantum="32M"/>
+		<provides><service name="Block"/></provides>
+	</start>
+	<start name="part_blk">
+		<resource name="RAM" quantum="10M" />
+		<provides><service name="Block" /></provides>
+		<route>
+			<any-service><child name="sd_card_drv"/> <parent/><any-child/></any-service>
+		</route>
+		<config>
+			<policy label="test-part2" partition="0"/>
+		</config>
+	</start>
+	<start name="test-part2">
+		<binary name="test-blk-cli"/>
+		<resource name="RAM" quantum="5M" />
+		<route>
+			<any-service> <child name="part_blk" /> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
+</config> }
+
+#
+# Boot modules
+#
+
+build_boot_image { core init timer sd_card_drv part_blk test-blk-cli }
+
+#
+# Qemu
+#
+
+append qemu_args " -nographic -m 128 "
+
+run_genode_until "Tests finished successfully.*\n.*Tests finished successfully.*\n" 100
+#exec rm bin/ata.raw
