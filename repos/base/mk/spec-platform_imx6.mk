@@ -6,7 +6,7 @@
 #
 
 # denote wich specs are also fullfilled by this spec
-SPECS += cortex_a9 imx6 imx epit
+SPECS += cortex_a9 imx6 imx epit usdhc
 
 # add repository relative include paths
 REP_INC_DIR += include/platform/imx6
