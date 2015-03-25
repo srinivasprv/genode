@@ -29,7 +29,6 @@ extern "C" {
 #include <sys/wait.h>
 
 #include <db.h>
-#include <fenv.h>
 #include <netdb.h>
 #include <signal.h>
 #include <unistd.h>
@@ -56,10 +55,6 @@ DUMMY(int   , -1, dup2, (int, int))
 DUMMY(void  ,   , endpwent, (void))
 DUMMY(int   ,  0, fchmod, (int, mode_t))
 DUMMY(int   , -1, fchown, (int, uid_t, gid_t))
-DUMMY(int   , -1, feholdexcept, (fenv_t *))
-DUMMY(int   , -1, fegetenv, (fenv_t *))
-DUMMY(int   , -1, feraiseexcept, (int))
-DUMMY(int   , -1, feupdateenv, (const fenv_t *))
 DUMMY(int   , -1, flock, (int, int))
 DUMMY(pid_t , -1, fork, (void))
 DUMMY(long  , -1, _fpathconf, (int, int))
@@ -88,9 +83,6 @@ DUMMY(struct passwd *, 0, getpwuid, (uid_t))
 DUMMY(int   ,  0, getpwuid_r, (uid_t, struct passwd *, char *, size_t, struct passwd **))
 DUMMY(int   , -1, getrusage, (int, rusage *))
 DUMMY(uid_t ,  0, getuid, (void))
-#ifndef __x86_64__
-__sse_support __has_sse;
-#endif
 DUMMY(int   , -1, kill, (pid_t, int))
 DUMMY(int   , -1, link, (const char *, const char *))
 DUMMY(int   , -1, mkfifo, (const char *, mode_t))
@@ -136,7 +128,6 @@ DUMMY(int   , -1, socketpair, (int, int, int, int *))
 DUMMY(int   , -1, stat, (const char *, struct stat *))
 DUMMY(int   , -1, statfs, (const char *, struct statfs *))
 DUMMY(void  ,   , sync, (void))
-DUMMY(int   , -1, __test_sse, (void))
 DUMMY(int   , -1, truncate, (const char *, off_t))
 DUMMY(mode_t,  0, umask, (mode_t))
 DUMMY(int   ,  0, utimes, (const char *, const timeval *))
